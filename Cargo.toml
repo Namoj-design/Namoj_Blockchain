@@ -7,13 +7,14 @@ edition = "2024"
 warp = "0.3"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-tokio = { version = "1.0", features = ["full"] }
+tokio = { version = "1.29", features = ["full"] }
 sha2 = "0.10"
 hex = "0.4"
 sled = "0.34"
 thiserror = "1.0"
-rand = "0.8"
-ed25519-dalek = "1.0"
-chrono = "0.4"
+rand = "0.8.5"
+rand_core = "0.6.4"
+ed25519-dalek = "1.0.1"
+chrono = { version = "0.4", features = ["serde"] }
 env_logger = "0.10"
 log = "0.4.28"
