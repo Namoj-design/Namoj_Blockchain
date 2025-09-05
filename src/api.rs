@@ -4,6 +4,8 @@ use crate::types::Transaction;
 use crate::chain::Blockchain;
 use crate::storage::Storage;
 use serde_json::json;
+use log::{info, error};
+use tokio;
 
 pub fn routes(shared_chain: Arc<tokio::sync::Mutex<Blockchain>>, db: Arc<Storage>) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
     let get_chain = warp::path!("chain")
@@ -13,7 +15,7 @@ pub fn routes(shared_chain: Arc<tokio::sync::Mutex<Blockchain>>, db: Arc<Storage
             async move {
                 let locked = chain.lock().await;
                 let body = serde_json::to_string(&*locked).unwrap();
-                Ok::<_, warp::Rejection>(warp::reply::with_status(body, warp::http::StatusCode::OK))
+                Ok::<_, warp::Rejection>(warp::reply::with_status(body.as_str(), warp::http::StatusCode::OK))
             }
         });
 
@@ -47,7 +49,7 @@ pub fn routes(shared_chain: Arc<tokio::sync::Mutex<Blockchain>>, db: Arc<Storage
                     let serialized = serde_json::to_vec(&*c).unwrap();
                     let _ = db.set(b"chain", &serialized);
                     let body = json!({"mined": block.index});
-                    Ok(warp::reply::with_status(serde_json::to_string(&body).unwrap(), warp::http::StatusCode::OK))
+                    Ok(warp::reply::with_status(serde_json::to_string(&body).unwrap().as_str(), warp::http::StatusCode::OK))
                 } else {
                     Ok(warp::reply::with_status("mine failed", warp::http::StatusCode::INTERNAL_SERVER_ERROR))
                 }
