@@ -1,5 +1,8 @@
 use std::sync::Arc;
 use warp::Filter;
+use log::info;
+use env_logger;
+
 
 mod types;
 mod chain;
