@@ -1,29 +1,51 @@
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
-use hex;
+use chrono::Utc;
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Transaction {
-    pub from: String, // hex pubkey
-    pub to: String,   // hex pubkey
+    pub from: String,
+    pub to: String,
     pub amount: u64,
-    pub signature: String, // hex signature (ed25519)
+    pub signature: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Block {
     pub index: u64,
-    pub prev_hash: String,
     pub timestamp: u128,
-    pub transactions: Vec<Transaction>,
+    pub prev_hash: String,
+    pub hash: String,
     pub nonce: u64,
+    pub transactions: Vec<Transaction>,
 }
 
 impl Block {
-    pub fn hash(&self) -> String {
-        let json = serde_json::to_string(self).expect("serialize block");
+    pub fn calculate_hash(&self) -> String {
+        let block_data = format!(
+            "{}{}{}{:?}{}",
+            self.index,
+            self.timestamp,
+            self.prev_hash,
+            self.transactions,
+            self.nonce
+        );
         let mut hasher = Sha256::new();
-        hasher.update(json.as_bytes());
+        hasher.update(block_data);
         hex::encode(hasher.finalize())
+    }
+
+    pub fn new(index: u64, prev_hash: String, transactions: Vec<Transaction>) -> Self {
+        let timestamp = Utc::now().timestamp_millis() as u128;
+        let mut block = Block {
+            index,
+            timestamp,
+            prev_hash,
+            hash: String::new(),
+            nonce: 0,
+            transactions,
+        };
+        block.hash = block.calculate_hash();
+        block
     }
 }
