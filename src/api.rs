@@ -1,16 +1,11 @@
 use std::sync::Arc;
 use warp::{Filter, Rejection, Reply};
 use tokio::sync::Mutex;
+use crate::types::{Blockchain, Transaction};
+use crate::storage::Storage;
 use serde_json::json;
 
-use crate::chain::Blockchain;
-use crate::storage::Storage;
-use crate::types::Transaction;
-
-pub fn routes(
-    shared_chain: Arc<Mutex<Blockchain>>,
-    db: Arc<Storage>,
-) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
+pub fn routes(shared_chain: Arc<Mutex<Blockchain>>, db: Arc<Storage>) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
     // GET /chain
     let get_chain = warp::path("chain")
         .and(warp::get())
@@ -34,8 +29,6 @@ pub fn routes(
     get_chain.or(post_tx)
 }
 
-fn with_chain(
-    chain: Arc<Mutex<Blockchain>>,
-) -> impl Filter<Extract = (Arc<Mutex<Blockchain>>,), Error = std::convert::Infallible> + Clone {
+fn with_chain(chain: Arc<Mutex<Blockchain>>) -> impl Filter<Extract = (Arc<Mutex<Blockchain>>,), Error = std::convert::Infallible> + Clone {
     warp::any().map(move || chain.clone())
 }

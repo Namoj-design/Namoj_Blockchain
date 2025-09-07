@@ -2,6 +2,7 @@ use std::sync::Arc;
 use tokio::sync::Mutex;
 use env_logger;
 use log::info;
+use warp::Filter;
 
 mod api;
 mod chain;
@@ -11,7 +12,7 @@ mod storage;
 mod types;
 mod wallet;
 
-use chain::Blockchain;
+use types::Blockchain;
 use storage::Storage;
 
 #[tokio::main]
@@ -21,7 +22,7 @@ async fn main() {
     // Initialize storage
     let db = Arc::new(Storage::new("blockchain_db").expect("Failed to init storage"));
 
-    // Load or initialize blockchain
+    // Initialize blockchain
     let bc = Blockchain::new();
     let shared_chain = Arc::new(Mutex::new(bc));
 

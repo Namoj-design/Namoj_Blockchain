@@ -1,9 +1,8 @@
-use serde::{Deserialize, Serialize};
-use serde::{Serialize, Deserialize};  
+use serde::{Serialize, Deserialize};
 use sha2::{Digest, Sha256};
 use chrono::Utc;
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Transaction {
     pub from: String,
     pub to: String,
@@ -12,11 +11,6 @@ pub struct Transaction {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Blockchain {
-    pub chain: Vec<Block>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, Clone, Debug)]
 pub struct Block {
     pub index: u64,
     pub timestamp: u128,
@@ -53,5 +47,34 @@ impl Block {
         };
         block.hash = block.calculate_hash();
         block
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Blockchain {
+    pub chain: Vec<Block>,
+    pub difficulty: usize,
+}
+
+impl Blockchain {
+    pub fn new() -> Self {
+        let mut bc = Blockchain { chain: Vec::new(), difficulty: 2 };
+        let genesis_block = Block::new(0, String::from("0"), vec![]);
+        bc.chain.push(genesis_block);
+        bc
+    }
+
+    pub fn add_block(&mut self, block: Block) {
+        self.chain.push(block);
+    }
+
+    pub fn last_hash(&self) -> String {
+        self.chain.last().unwrap().hash.clone()
+    }
+
+    pub fn add_transaction(&mut self, tx: Transaction) {
+        let mut block = Block::new(self.chain.len() as u64, self.last_hash(), vec![tx]);
+        block.hash = block.calculate_hash();
+        self.add_block(block);
     }
 }

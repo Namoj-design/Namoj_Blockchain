@@ -1,4 +1,4 @@
-use crate::types::{Block, Transaction};
+use crate::types::Block;
 
 pub fn mine_block(mut block: Block, difficulty: usize) -> Block {
     let prefix = "0".repeat(difficulty);
