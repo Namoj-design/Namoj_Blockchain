@@ -11,6 +11,11 @@ pub struct Transaction {
     pub signature: Option<String>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Blockchain {
+    pub chain: Vec<Block>,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, Clone, Debug)]
 pub struct Block {
     pub index: u64,
