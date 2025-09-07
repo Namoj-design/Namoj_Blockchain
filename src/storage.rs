@@ -1,29 +1,23 @@
 use sled::{Db, IVec};
-use thiserror::Error;
 
-#[derive(Debug, Error)]
-pub enum StorageError {
-    #[error("sled error: {0}")]
-    Sled(#[from] sled::Error),
-}
-
+#[derive(Clone)]
 pub struct Storage {
     db: Db,
 }
 
 impl Storage {
-    pub fn open(path: &str) -> Result<Self, StorageError> {
+    pub fn new(path: &str) -> Result<Self, sled::Error> {
         let db = sled::open(path)?;
         Ok(Storage { db })
     }
 
-    pub fn get(&self, key: &[u8]) -> Result<Option<IVec>, StorageError> {
-        Ok(self.db.get(key)?)
-    }
-
-    pub fn set(&self, key: &[u8], val: &[u8]) -> Result<(), StorageError> {
-        self.db.insert(key, val)?;
+    pub fn put(&self, key: &str, value: &[u8]) -> Result<(), sled::Error> {
+        self.db.insert(key, value)?;
         self.db.flush()?;
         Ok(())
+    }
+
+    pub fn get(&self, key: &str) -> Option<IVec> {
+        self.db.get(key).ok().flatten()
     }
 }
