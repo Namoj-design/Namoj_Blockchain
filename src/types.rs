@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use serde::{Serialize, Deserialize};
+use serde::{Serialize, Deserialize};  
 use sha2::{Digest, Sha256};
 use chrono::Utc;
 
@@ -11,7 +11,7 @@ pub struct Transaction {
     pub signature: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Debug, Clone, Serialize, Deserialize, Clone, Debug)]
 pub struct Block {
     pub index: u64,
     pub timestamp: u128,
