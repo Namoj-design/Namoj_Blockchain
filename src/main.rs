@@ -1,13 +1,15 @@
 use std::sync::Arc;
-use warp::Filter;
+use tokio::sync::Mutex;
+use env_logger;
+use log::info;
 
-mod types;
+mod api;
 mod chain;
 mod miner;
+mod p2p;
 mod storage;
+mod types;
 mod wallet;
-mod api;
-mod p2p; // skeleton
 
 use chain::Blockchain;
 use storage::Storage;
@@ -15,31 +17,21 @@ use storage::Storage;
 #[tokio::main]
 async fn main() {
     env_logger::init();
+
     // Initialize storage
-    let db = Storage::open("chain_db").expect("db open");
-    // Load or create chain
-    let mut bc = Blockchain::new();
-    if let Ok(Some(serialized)) = db.get(b"chain") {
-        if let Ok(chain) = serde_json::from_slice::<Blockchain>(&serialized) {
-            bc = chain;
-            log::info!("Loaded chain from DB, length={}", bc.chain.len());
-        }
-    }
+    let db = Arc::new(Storage::new("blockchain_db").expect("Failed to init storage"));
 
-    let shared_chain = Arc::new(tokio::sync::Mutex::new(bc));
-    let shared_db = Arc::new(db);
+    // Load or initialize blockchain
+    let bc = Blockchain::new();
+    let shared_chain = Arc::new(Mutex::new(bc));
 
-    // Start P2P (skeleton): spawn background task
-    let _p2p_handle = {
-        let _chain = shared_chain.clone();
-        tokio::spawn(async move {
-            p2p::run().await;
-        })
-    };
+    info!("Blockchain initialized");
 
-    // HTTP API routes
-    let api_routes = api::routes(shared_chain.clone(), shared_db.clone());
+    // Start API server
+    let api_routes = api::routes(shared_chain.clone(), db.clone());
+    info!("Starting HTTP server at 127.0.0.1:3030");
 
-    log::info!("Starting HTTP server at 127.0.0.1:3030");
-    warp::serve(api_routes).run(([127, 0, 0, 1], 3030)).await;
+    warp::serve(api_routes)
+        .run(([127, 0, 0, 1], 3030))
+        .await;
 }
