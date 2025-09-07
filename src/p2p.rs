@@ -1,3 +1,3 @@
-pub async fn run() {
-    log::info!("P2P module started (skeleton). Implement libp2p node here.");
+pub fn start_p2p() {
+    log::info!("P2P module placeholder. Implement libp2p here.");
 }
