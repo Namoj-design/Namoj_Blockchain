@@ -31,5 +31,4 @@ The `namoj_blockchain` project is a minimal blockchain system that demonstrates 
 
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-
-
+thank you 
